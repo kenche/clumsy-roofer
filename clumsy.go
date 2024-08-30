@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,21 +16,25 @@ import (
 
 func main() {
 	ctx := context.Background()
-	if err := run(ctx); err != nil {
+	if err := run(ctx, os.Args[1:]); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context) error {
+func run(ctx context.Context, args []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	// slog.SetLogLoggerLevel(slog.LevelDebug)
+	fs := flag.NewFlagSet("", flag.ContinueOnError)
+	loggingEnabled := fs.Bool("logging", true, "Enables HTTP logging")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
 
 	httpServer := &http.Server{
 		Addr:           ":8080",
-		Handler:        app.NewServer(),
+		Handler:        app.NewServer(*loggingEnabled),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,

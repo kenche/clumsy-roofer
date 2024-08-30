@@ -6,8 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewServer() http.Handler {
-	router := gin.Default()
+func NewServer(loggingEnabled bool) http.Handler {
+	var router *gin.Engine
+	if loggingEnabled {
+		router = gin.Default()
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		router = gin.New()
+		router.Use(gin.Recovery())
+	}
+
 	store := NewStore()
 	riskHandler := NewRiskHandler(store)
 	v1 := router.Group("/v1")
