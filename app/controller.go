@@ -13,7 +13,6 @@ import (
 
 var (
 	errIDNotFound = fmt.Errorf("id not found")
-	errIDNotUUID  = fmt.Errorf("id is not UUID")
 )
 
 type store struct {
@@ -52,29 +51,28 @@ func (d *store) getAll() []Risk {
 	return valList
 }
 
-type riskHandler struct {
+type riskController struct {
 	store *store
 }
 
-func NewRiskHandler(store *store) *riskHandler {
-	return &riskHandler{store: store}
+func NewRiskController(store *store) *riskController {
+	return &riskController{store: store}
 }
 
-func (rh *riskHandler) list() gin.HandlerFunc {
+func (rh *riskController) list() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		valList := rh.store.getAll()
 		c.JSON(http.StatusOK, valList)
-
 	}
 }
 
-func (rh *riskHandler) get() gin.HandlerFunc {
+func (rh *riskController) get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		inputID := c.Param("id")
 		var id uuid.UUID
 		var err error
 		if id, err = uuid.Parse(inputID); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": errIDNotUUID.Error()})
+			c.JSON(http.StatusNotFound, gin.H{"error": errIDNotFound.Error()})
 			return
 		}
 
@@ -89,14 +87,17 @@ func (rh *riskHandler) get() gin.HandlerFunc {
 	}
 }
 
-func (rh *riskHandler) post() gin.HandlerFunc {
+func (rh *riskController) post() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var inputRisk CreateRisk
 		if err := c.ShouldBindJSON(&inputRisk); err != nil {
 			var ve validator.ValidationErrors
 			if errors.As(err, &ve) {
-				c.JSON(http.StatusBadRequest, gin.H{"error": ve[0].Error()})
+				c.JSON(http.StatusBadRequest,
+					gin.H{
+						"error": fmt.Sprintf("Field validation for '%s' failed on the '%s' tag", ve[0].Field(), ve[0].Tag()),
+					})
 				return
 			}
 

@@ -24,7 +24,7 @@ type Risk struct {
 func TestServer(t *testing.T) {
 
 	t.Run("No items on start", func(t *testing.T) {
-		handler := app.NewServer(false)
+		handler := app.NewHandler(false)
 		svr := httptest.NewServer(handler)
 		defer svr.Close()
 
@@ -43,7 +43,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("GET Non existent item returns 404", func(t *testing.T) {
-		handler := app.NewServer(false)
+		handler := app.NewHandler(false)
 		svr := httptest.NewServer(handler)
 		defer svr.Close()
 
@@ -53,18 +53,18 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, 404, resp.StatusCode)
 	})
 
-	t.Run("GET with invalid ID returns 400", func(t *testing.T) {
-		handler := app.NewServer(false)
+	t.Run("GET with invalid ID returns 404", func(t *testing.T) {
+		handler := app.NewHandler(false)
 		svr := httptest.NewServer(handler)
 		defer svr.Close()
 
 		resp, err := http.Get(svr.URL + "/v1/risks/c0ffee")
 		assert.NoError(t, err)
-		assert.Equal(t, 400, resp.StatusCode)
+		assert.Equal(t, 404, resp.StatusCode)
 	})
 
 	t.Run("Post one item", func(t *testing.T) {
-		handler := app.NewServer(false)
+		handler := app.NewHandler(false)
 		svr := httptest.NewServer(handler)
 		defer svr.Close()
 
@@ -92,7 +92,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Missing state returns 400", func(t *testing.T) {
-		handler := app.NewServer(false)
+		handler := app.NewHandler(false)
 		svr := httptest.NewServer(handler)
 		defer svr.Close()
 
@@ -108,7 +108,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Invalid state returns 400", func(t *testing.T) {
-		handler := app.NewServer(false)
+		handler := app.NewHandler(false)
 		svr := httptest.NewServer(handler)
 		defer svr.Close()
 
@@ -125,7 +125,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("GET one item", func(t *testing.T) {
-		handler := app.NewServer(false)
+		handler := app.NewHandler(false)
 		svr := httptest.NewServer(handler)
 		defer svr.Close()
 
@@ -165,7 +165,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("Concurrently Post items then List", func(t *testing.T) {
-		handler := app.NewServer(false)
+		handler := app.NewHandler(false)
 		svr := httptest.NewServer(handler)
 		defer svr.Close()
 

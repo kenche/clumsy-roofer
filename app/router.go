@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewServer(loggingEnabled bool) http.Handler {
+func NewHandler(loggingEnabled bool) http.Handler {
 	var router *gin.Engine
 	if loggingEnabled {
 		router = gin.Default()
@@ -17,13 +17,19 @@ func NewServer(loggingEnabled bool) http.Handler {
 	}
 
 	store := NewStore()
-	riskHandler := NewRiskHandler(store)
+	riskCtrller := NewRiskController(store)
 	v1 := router.Group("/v1")
 	{
-		v1.GET("/risks", riskHandler.list())
-		v1.POST("/risks", riskHandler.post())
-		v1.GET("/risks/:id", riskHandler.get())
+		v1.GET("/risks", riskCtrller.list())
+		v1.GET("/risks/", riskCtrller.list())
+		v1.POST("/risks", riskCtrller.post())
+		v1.POST("/risks/", riskCtrller.post())
+		v1.GET("/risks/:id", riskCtrller.get())
+		v1.GET("/risks/:id/", riskCtrller.get())
 	}
+	router.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Route not found"})
+	})
 
 	return router.Handler()
 }

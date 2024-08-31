@@ -34,7 +34,7 @@ func run(ctx context.Context, args []string) error {
 
 	httpServer := &http.Server{
 		Addr:           ":8080",
-		Handler:        app.NewServer(*loggingEnabled),
+		Handler:        app.NewHandler(*loggingEnabled),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,

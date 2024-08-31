@@ -1,4 +1,5 @@
 # clumsy-roofer
+A little exercise on building a REST backend.
 
 ### Running
 Runs an HTTP server on port 8080, with logging enabled:
